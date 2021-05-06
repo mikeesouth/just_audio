@@ -173,6 +173,7 @@ class _MyAppState extends State<MyApp> {
                             setState(() => _soundPlaying = true);
                             await _soundPlayer.setAsset('audio/test_sound.mp3');
                             await _soundPlayer.play();
+                            await _soundPlayer.stop();
                             setState(() => _soundPlaying = false);
                           },
                   ),
@@ -186,6 +187,7 @@ class _MyAppState extends State<MyApp> {
                             setState(() => _soundPlaying = true);
                             await _soundPlayer.setAsset('audio/testing123.mp3');
                             await _soundPlayer.play();
+                            await _soundPlayer.stop();
                             setState(() => _soundPlaying = false);
                           },
                   ),
