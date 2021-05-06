@@ -1,5 +1,4 @@
 import 'dart:math';
-
 import 'package:audio_session/audio_session.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +15,12 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   late AudioPlayer _player;
+
+  late AudioPlayer _songPlayer;
+  late AudioPlayer _soundPlayer;
+  bool _songPlaying = false;
+  bool _soundPlaying = false;
+
   final _playlist = ConcatenatingAudioSource(children: [
     ClippingAudioSource(
       start: Duration(seconds: 60),
@@ -64,6 +69,8 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     _player = AudioPlayer();
+    _songPlayer = AudioPlayer();
+    _soundPlayer = AudioPlayer();
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       statusBarColor: Colors.black,
     ));
@@ -128,6 +135,62 @@ class _MyAppState extends State<MyApp> {
                 ),
               ),
               ControlButtons(_player),
+              Wrap(
+                runSpacing: 10.0,
+                spacing: 10.0,
+                children: [
+                  MaterialButton(
+                    color: Colors.red,
+                    disabledColor: Colors.red.withOpacity(0.5),
+                    child: Text('Stop song'),
+                    onPressed: _songPlaying
+                        ? () async {
+                            await _songPlayer.stop();
+                            setState(() => _songPlaying = false);
+                          }
+                        : null,
+                  ),
+                  MaterialButton(
+                    color: Colors.green,
+                    disabledColor: Colors.green.withOpacity(0.5),
+                    child: Text('Stereo song'),
+                    onPressed: _songPlaying
+                        ? null
+                        : () async {
+                            setState(() => _songPlaying = true);
+                            await _songPlayer.setAsset('audio/stereo_song.mp3');
+                            await _songPlayer.play();
+                            setState(() => _songPlaying = false);
+                          },
+                  ),
+                  MaterialButton(
+                    color: Colors.blue,
+                    disabledColor: Colors.blue.withOpacity(0.5),
+                    child: Text('Test sound'),
+                    onPressed: _soundPlaying
+                        ? null
+                        : () async {
+                            setState(() => _soundPlaying = true);
+                            await _soundPlayer.setAsset('audio/test_sound.mp3');
+                            await _soundPlayer.play();
+                            setState(() => _soundPlaying = false);
+                          },
+                  ),
+                  MaterialButton(
+                    color: Colors.blue,
+                    disabledColor: Colors.blue.withOpacity(0.5),
+                    child: Text('Testing 1 2 3'),
+                    onPressed: _soundPlaying
+                        ? null
+                        : () async {
+                            setState(() => _soundPlaying = true);
+                            await _soundPlayer.setAsset('audio/testing123.mp3');
+                            await _soundPlayer.play();
+                            setState(() => _soundPlaying = false);
+                          },
+                  ),
+                ],
+              ),
               StreamBuilder<Duration?>(
                 stream: _player.durationStream,
                 builder: (context, snapshot) {
