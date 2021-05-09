@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:pedantic/pedantic.dart';
 
 void main() => runApp(MyApp());
 
@@ -20,6 +21,8 @@ class _MyAppState extends State<MyApp> {
   late AudioPlayer _soundPlayer;
   bool _songPlaying = false;
   bool _soundPlaying = false;
+  bool _massTestPlaying = false;
+  int _soundIndex = 0;
 
   final _playlist = ConcatenatingAudioSource(children: [
     ClippingAudioSource(
@@ -151,6 +154,18 @@ class _MyAppState extends State<MyApp> {
                         : null,
                   ),
                   MaterialButton(
+                    color: Colors.red,
+                    disabledColor: Colors.red.withOpacity(0.5),
+                    child: Text('Dispose song'),
+                    onPressed: _songPlaying
+                        ? () async {
+                            await _songPlayer.dispose();
+                            _songPlayer = AudioPlayer();
+                            setState(() => _songPlaying = false);
+                          }
+                        : null,
+                  ),
+                  MaterialButton(
                     color: Colors.green,
                     disabledColor: Colors.green.withOpacity(0.5),
                     child: Text('Stereo song'),
@@ -189,6 +204,25 @@ class _MyAppState extends State<MyApp> {
                             await _soundPlayer.play();
                             await _soundPlayer.stop();
                             setState(() => _soundPlaying = false);
+                          },
+                  ),
+                  MaterialButton(
+                    color: Colors.blue,
+                    disabledColor: Colors.blue.withOpacity(0.5),
+                    child: Text('Test sound ($_soundIndex / 1000 times)'),
+                    onPressed: _massTestPlaying
+                        ? null
+                        : () async {
+                            setState(() => _massTestPlaying = true);
+                            for (var i = 0; i < 1000; i++) {
+                              if (i % 10 == 0) setState(() => _soundIndex = i);
+                              final player = AudioPlayer();
+                              await player.setAsset('audio/test_sound.mp3');
+                              unawaited(_playAndDispose(player));
+                              await Future<dynamic>.delayed(
+                                  Duration(milliseconds: 100));
+                            }
+                            setState(() => _massTestPlaying = false);
                           },
                   ),
                 ],
@@ -344,6 +378,11 @@ class _MyAppState extends State<MyApp> {
         ),
       ),
     );
+  }
+
+  Future<void> _playAndDispose(AudioPlayer player) async {
+    await player.play();
+    await player.dispose();
   }
 }
 
