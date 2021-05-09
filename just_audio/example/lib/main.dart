@@ -23,6 +23,7 @@ class _MyAppState extends State<MyApp> {
   bool _soundPlaying = false;
   bool _massTestPlaying = false;
   int _soundIndex = 0;
+  bool _manualActivation = false;
 
   final _playlist = ConcatenatingAudioSource(children: [
     ClippingAudioSource(
@@ -204,6 +205,25 @@ class _MyAppState extends State<MyApp> {
                             await _soundPlayer.play();
                             await _soundPlayer.stop();
                             setState(() => _soundPlaying = false);
+                          },
+                  ),
+                  MaterialButton(
+                    color: Colors.blue,
+                    disabledColor: Colors.blue.withOpacity(0.5),
+                    child: Text('Manual activation'),
+                    onPressed: _manualActivation
+                        ? null
+                        : () async {
+                            setState(() => _manualActivation = true);
+                            final player = AudioPlayer(
+                              handleInterruptions: false,
+                              handleAudioSessionActivation: false,
+                            );
+                            await player.setAsset('audio/testing123.mp3');
+                            await (await AudioSession.instance).setActive(true);
+                            await player.play();
+                            await player.dispose();
+                            setState(() => _manualActivation = false);
                           },
                   ),
                   MaterialButton(
